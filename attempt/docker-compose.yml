@@ -1,0 +1,29 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "8000:8000"
+    networks:
+      - my-network
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    depends_on:
+      - server
+    networks:
+      - my-network
+    environment:
+      - SERVER_URL=http://server:8000
+
+
+networks:
+    my-network:
+      driver: bridge
+
+
+
+
