@@ -47,3 +47,10 @@ class TestEndToEnd(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    """
+    End-to-End test: test_get_count_e2e
+    Tests the full workflow of defining an item, adding it to the inventory, and then
+    retrieving the count using the new get_count API call.
+    
+    """
