@@ -8,20 +8,22 @@ class TestEndToEnd(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Start the Flask server
         cls.server_process = subprocess.Popen(['python', 'server.py'])
-        # Give the server a moment to start up
         time.sleep(5)
         cls.client = InventoryClient("http://localhost:5000")
 
     @classmethod
     def tearDownClass(cls):
-        # Stop the Flask server
         cls.server_process.terminate()
         cls.server_process.wait()
 
+    def setUp(self):
+        try:
+            self.client.undefine("widget")
+        except Exception:
+            pass
+
     def test_define_and_manage_inventory(self):
-        # Define a new item
         response = self.client.define_stuff("widget", "A useful widget")
         self.assertEqual(response, {'message': 'Defined type \'widget\' with description \'A useful widget\'.'})
 
@@ -44,13 +46,21 @@ class TestEndToEnd(unittest.TestCase):
         # Check item count for undefined item
         response = self.client.get_count("widget")
         self.assertEqual(response, {'count': -1})
+        
+        # Added new end to end test cases
+        
+    def test_backup_functionality(self):
+        self.client.define_stuff("widget", "A useful widget")
+        self.client.add(10, "widget")
+        snapshot_id = self.client.save_data()
+        self.assertIsNotNone(snapshot_id)
+        self.client.undefine("widget")
+        load_result = self.client.load_data(snapshot_id)
+        self.assertEqual(load_result, {'message': 'Success'})
+        response = self.client.get_count("widget")
+        self.assertEqual(response, {'count': 10})
+        delete_result = self.client.delete_data(snapshot_id)
+        self.assertEqual(delete_result, {'message': 'Deleted Successfully'})
 
 if __name__ == '__main__':
     unittest.main()
-
-    """
-    End-to-End test: test_get_count_e2e
-    Tests the full workflow of defining an item, adding it to the inventory, and then
-    retrieving the count using the new get_count API call.
-    
-    """

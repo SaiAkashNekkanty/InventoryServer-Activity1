@@ -1,8 +1,12 @@
 import logging
+import json
+import os
 
 class InventoryService:
     def __init__(self):
         self.inventory = {}
+        self.current_snapshot_id = 0
+        self.snapshots = {}  
         self.logger = logging.getLogger('InventoryService')
         self.logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
@@ -56,3 +60,23 @@ class InventoryService:
             return self.inventory[type]['quantity']
         else:
             return -1
+        
+        # adding the new methods
+    def save_data(self):
+        snapshot_id = self.current_snapshot_id
+        self.snapshots[snapshot_id] = json.dumps(self.inventory)
+        self.current_snapshot_id += 1
+        return snapshot_id
+
+    def load_data(self, snapshot_id):
+        if snapshot_id in self.snapshots:
+            self.inventory = json.loads(self.snapshots[snapshot_id])
+            return 0
+        return -1
+
+    def delete_data(self, snapshot_id):
+        if snapshot_id in self.snapshots:
+            del self.snapshots[snapshot_id]
+            return 0
+        return -1
+

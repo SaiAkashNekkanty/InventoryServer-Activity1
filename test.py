@@ -1,7 +1,8 @@
+import requests
 import unittest
 from unittest.mock import patch
 from client import InventoryClient
-import requests
+
 import json
 
 class TestInventoryClient(unittest.TestCase):
@@ -71,6 +72,38 @@ class TestInventoryClient(unittest.TestCase):
         
         self.assertEqual(response, {'count': -1})
         mock_get.assert_called_once_with('http://localhost:5000/get_count', params={"type": "undefined_item"})
+    
+    # adding the new unit tests
+    @patch('requests.post')
+    def test_save_data(self, mock_post):
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {'id': 0}
+        client = InventoryClient("http://localhost:5000")
+        response = client.save_data()
+        self.assertEqual(response, 0)
+        mock_post.assert_called_once_with('http://localhost:5000/save_data', headers={'Content-Type': 'application/json'}, data=json.dumps({}))
+
+    @patch('requests.post')
+    def test_load_data(self, mock_post):
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {'message': 'Success'}
+        
+        client = InventoryClient("http://localhost:5000")
+        response = client.load_data(0)
+        
+        self.assertEqual(response, {'message': 'Success'})
+        mock_post.assert_called_once_with('http://localhost:5000/load_data', headers={'Content-Type': 'application/json'}, data=json.dumps({"id": 0}))
+
+    @patch('requests.post')
+    def test_delete_data(self, mock_post):
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {'message': 'Deleted Successfully'}
+        
+        client = InventoryClient("http://localhost:5000")
+        response = client.delete_data(0)
+        
+        self.assertEqual(response, {'message': 'Deleted Successfully'})
+        mock_post.assert_called_once_with('http://localhost:5000/delete_data', headers={'Content-Type': 'application/json'}, data=json.dumps({"id": 0}))
 
 if __name__ == '__main__':
     unittest.main()
