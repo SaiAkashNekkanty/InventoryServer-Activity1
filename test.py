@@ -105,5 +105,17 @@ class TestInventoryClient(unittest.TestCase):
         self.assertEqual(response, {'message': 'Deleted Successfully'})
         mock_post.assert_called_once_with('http://localhost:5000/delete_data', headers={'Content-Type': 'application/json'}, data=json.dumps({"id": 0}))
 
+
+    @patch('requests.post')
+    def test_cr_delete_data_failure(self, mock_post):
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {'message': 'Failed'}
+        
+        client = InventoryClient("http://localhost:5000")
+        response = client.delete_data('invalid-id')
+        
+        self.assertEqual(response, {'message': 'Failed'})
+        mock_post.assert_called_once_with('http://localhost:5000/delete_data', headers={'Content-Type': 'application/json'}, data=json.dumps({"snapshot_id": "invalid-id"}))
+
 if __name__ == '__main__':
     unittest.main()
