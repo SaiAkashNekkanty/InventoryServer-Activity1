@@ -115,7 +115,7 @@ class TestInventoryClient(unittest.TestCase):
         response = client.delete_data('invalid-id')
         
         self.assertEqual(response, {'message': 'Failed'})
-        mock_post.assert_called_once_with('http://localhost:5000/delete_data', headers={'Content-Type': 'application/json'}, data=json.dumps({"snapshot_id": "invalid-id"}))
+        mock_post.assert_called_once_with('http://localhost:5000/delete_data', headers={'Content-Type': 'application/json'}, data=json.dumps({"id": "invalid-id"}))
 
 if __name__ == '__main__':
     unittest.main()
