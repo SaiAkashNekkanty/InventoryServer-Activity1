@@ -62,5 +62,35 @@ class TestEndToEnd(unittest.TestCase):
         delete_result = self.client.delete_data(snapshot_id)
         self.assertEqual(delete_result, {'message': 'Deleted Successfully'})
 
+
+    def test_cr_save_load_delete_inventory(self):
+        response = self.client.define_stuff("test", "A useful test")
+        self.assertEqual(response, {'message': 'Defined type \'test\' with description \'A useful test\'.'})
+
+        response = self.client.add(10, "test")
+        self.assertEqual(response, {'message': 'Added 10 of type \'test\'.'})
+
+        snapshot_id = self.client.save_data()
+        self.assertIsNotNone(snapshot_id)
+
+        response = self.client.remove(10, "test")
+        self.assertEqual(response, {'message': 'Removed 10 of type \'test\'.'})
+        response = self.client.undefine("test")
+        self.assertEqual(response, {'message': 'Undefined type \'test\'.'})
+
+        load_response = self.client.load_data(snapshot_id)
+        self.assertEqual(load_response, {'message': 'Success'})
+
+        response = self.client.get_count("test")
+        self.assertEqual(response, {'count': 10})
+
+        delete_response = self.client.delete_data(snapshot_id)
+        self.assertEqual(delete_response, {'message': 'Deleted Successfully'})
+
+        load_response_after_delete = self.client.load_data(snapshot_id)
+        self.assertEqual(load_response_after_delete, {'message': 'Failed'})
+
+        self.client.undefine("test")
+
 if __name__ == '__main__':
     unittest.main()
