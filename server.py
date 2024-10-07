@@ -8,60 +8,66 @@ service = InventoryService()
 @app.route('/define_stuff', methods=['POST'])
 def define_stuff():
     data = request.json
-    type = data.get('type')
+    item_type = data.get('type')
     description = data.get('description')
-    result = service.define_stuff(type, description)
+    result = service.define_stuff(item_type, description)
     return jsonify({'message': result})
 
 @app.route('/undefine', methods=['POST'])
 def undefine():
     data = request.json
-    type = data.get('type')
-    result = service.undefine(type)
+    item_type = data.get('type')
+    result = service.undefine(item_type)
     return jsonify({'message': result})
 
 @app.route('/add', methods=['POST'])
 def add():
     data = request.json
     quantity = data.get('quantity')
-    type = data.get('type')
-    result = service.add(quantity, type)
+    item_type = data.get('type')
+    result = service.add(quantity, item_type)
     return jsonify({'message': result})
 
 @app.route('/remove', methods=['POST'])
 def remove():
     data = request.json
     quantity = data.get('quantity')
-    type = data.get('type')
-    result = service.remove(quantity, type)
+    item_type = data.get('type')
+    result = service.remove(quantity, item_type)
     return jsonify({'message': result})
 
 @app.route('/get_count', methods=['GET'])
 def get_count():
-    type = request.args.get('type')
-    count = service.get_count(type)
+    item_type = request.args.get('type')
+    count = service.get_count(item_type)
     return jsonify({'count': count})
-
-#adding the new API calls
 
 @app.route('/save_data', methods=['POST'])
 def save_data():
-    snapshot_id = service.save_data()
-    return jsonify({'id': snapshot_id})
+    result = service.save_data()
+    return jsonify(result)
 
 @app.route('/load_data', methods=['POST'])
 def load_data():
     data = request.json
-    snapshot_id = data.get('id')
+    snapshot_id = data.get('snapshot_id')
+    
     result = service.load_data(snapshot_id)
-    return jsonify({'message': 'Success' if result == 0 else 'Failed'})
+    
+    if result is not None: 
+        return jsonify({'message': 'Data loaded successfully.'}), 200
+    else:
+        return jsonify({'error': 'Snapshot not found.'}), 404
 
 @app.route('/delete_data', methods=['POST'])
 def delete_data():
     data = request.json
-    snapshot_id = data.get('id')
+    snapshot_id = data.get('snapshot_id')
     result = service.delete_data(snapshot_id)
-    return jsonify({'message': 'Deleted Successfully' if result == 0 else 'Failed'})
+    if result == 0:
+        return jsonify({'message': 'Snapshot deleted successfully.'})
+    else:
+        return jsonify({'error': 'Snapshot not found.'}), 404
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

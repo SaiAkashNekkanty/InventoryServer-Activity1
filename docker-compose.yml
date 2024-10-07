@@ -1,15 +1,19 @@
-# docker-compose.yml
-
 version: '3.8'
 
 services:
-  inventory-service:
-    build: .
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile_server
     ports:
       - "5000:5000"
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile_client
+    depends_on:
+      - server
+    command: python client_file.py /app/data 20  # Adjust command to run your script
     volumes:
-      - .:/app
-    environment:
-      - FLASK_ENV=development
-
-
+      - ./data:/app/data

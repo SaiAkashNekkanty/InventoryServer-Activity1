@@ -1,0 +1,11 @@
+﻿
+define_stuff,convertible,Mazda MX-5
+add,3,convertible
+get_count,convertible,
+define_stuff,pickup,Ford F-150
+add,12,pickup
+get_count,pickup,
+remove,5,pickup
+save_data,
+load_data,1,
+get_count,convertible,

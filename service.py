@@ -1,82 +1,89 @@
-import logging
 import json
 import os
+import logging
 
 class InventoryService:
     def __init__(self):
         self.inventory = {}
-        self.current_snapshot_id = 0
-        self.snapshots = {}  
-        self.logger = logging.getLogger('InventoryService')
-        self.logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+        self.snapshots = {} 
+        logging.basicConfig(level=logging.INFO)
 
-    def define_stuff(self, type, description):
-        if type in self.inventory:
-            self.logger.warning(f"Type '{type}' is already defined.")
-            return f"Type '{type}' is already defined."
+    def define_stuff(self, item_type, description):
+        if item_type in self.inventory:
+            logging.warning(f"Type '{item_type}' is already defined.")
+            return f"Type '{item_type}' is already defined."
         else:
-            self.inventory[type] = {'description': description, 'quantity': 0}
-            self.logger.info(f"Defined type '{type}' with description '{description}'.")
-            return f"Defined type '{type}' with description '{description}'."
+            self.inventory[item_type] = {'description': description, 'quantity': 0}
+            logging.info(f"Defined type '{item_type}' with description '{description}'.")
+            return f"Defined type '{item_type}' with description '{description}'."
 
-    def undefine(self, type):
-        if type in self.inventory:
-            del self.inventory[type]
-            self.logger.info(f"Undefined type '{type}'.")
-            return f"Undefined type '{type}'."
+    def undefine(self, item_type):
+        if item_type in self.inventory:
+            del self.inventory[item_type]
+            logging.info(f"Undefined type '{item_type}'.")
+            return f"Undefined type '{item_type}'."
         else:
-            self.logger.warning(f"Type '{type}' does not exist.")
-            return f"Type '{type}' does not exist."
+            logging.warning(f"Type '{item_type}' does not exist.")
+            return f"Type '{item_type}' does not exist."
 
-    def add(self, quantity, type):
-        if type in self.inventory:
-            self.inventory[type]['quantity'] += quantity
-            self.logger.info(f"Added {quantity} of type '{type}'.")
-            return f"Added {quantity} of type '{type}'."
+    def add(self, quantity, item_type):
+        if item_type in self.inventory:
+            self.inventory[item_type]['quantity'] += quantity
+            logging.info(f"Added {quantity} of type '{item_type}'.")
+            return f"Added {quantity} of type '{item_type}'."
         else:
-            self.logger.warning(f"Type '{type}' does not exist.")
-            return f"Type '{type}' does not exist."
+            logging.warning(f"Type '{item_type}' does not exist.")
+            return f"Type '{item_type}' does not exist."
 
-    def remove(self, quantity, type):
-        if type in self.inventory:
-            if self.inventory[type]['quantity'] >= quantity:
-                self.inventory[type]['quantity'] -= quantity
-                self.logger.info(f"Removed {quantity} of type '{type}'.")
-                return f"Removed {quantity} of type '{type}'."
+    def remove(self, quantity, item_type):
+        if item_type in self.inventory:
+            if self.inventory[item_type]['quantity'] >= quantity:
+                self.inventory[item_type]['quantity'] -= quantity
+                logging.info(f"Removed {quantity} of type '{item_type}'.")
+                return f"Removed {quantity} of type '{item_type}'."
             else:
-                self.logger.warning(f"Not enough of type '{type}' to remove.")
-                return f"Not enough of type '{type}' to remove."
+                logging.warning(f"Not enough of type '{item_type}' to remove.")
+                return f"Not enough of type '{item_type}' to remove."
         else:
-            self.logger.warning(f"Type '{type}' does not exist.")
-            return f"Type '{type}' does not exist."
+            logging.warning(f"Type '{item_type}' does not exist.")
+            return f"Type '{item_type}' does not exist."
 
-    def get_count(self, type):
-        if type in self.inventory:
-            return self.inventory[type]['quantity']
+    def get_count(self, item_type):
+        if item_type in self.inventory:
+            count = self.inventory[item_type]['quantity']
+            logging.info(f"Count for '{item_type}': {count}.")
+            return count
         else:
+            logging.info(f"Count for '{item_type}': -1 (undefined).")
             return -1
-        
-        # adding the new methods
+
     def save_data(self):
-        snapshot_id = self.current_snapshot_id
-        self.snapshots[snapshot_id] = json.dumps(self.inventory)
-        self.current_snapshot_id += 1
-        return snapshot_id
+        snapshot_id = str(len(self.snapshots) + 1)  
+        filename = f'snapshot_{snapshot_id}.json'  
+
+        with open(filename, 'w') as f:
+            json.dump(self.inventory, f)
+
+        self.snapshots[snapshot_id] = filename  
+        return {'snapshot_id': snapshot_id}
 
     def load_data(self, snapshot_id):
-        if snapshot_id in self.snapshots:
-            self.inventory = json.loads(self.snapshots[snapshot_id])
-            return 0
-        return -1
+        filename = self.snapshots.get(snapshot_id) 
+        if not filename or not os.path.exists(filename):
+            logging.error(f"Snapshot ID '{snapshot_id}' not found.")
+            return 404  
+
+        with open(filename, 'r') as f:
+            self.inventory = json.load(f)
+
+        logging.info(f"Loaded inventory from snapshot ID '{snapshot_id}'.")
+        return 0  
 
     def delete_data(self, snapshot_id):
-        if snapshot_id in self.snapshots:
-            del self.snapshots[snapshot_id]
-            return 0
-        return -1
-
+        filename = self.snapshots.pop(snapshot_id, None) 
+        if filename and os.path.exists(filename):
+            os.remove(filename) 
+            logging.info(f"Deleted snapshot ID '{snapshot_id}'.")
+            return 0 
+        logging.error(f"Snapshot ID '{snapshot_id}' not found.")
+        return 404  

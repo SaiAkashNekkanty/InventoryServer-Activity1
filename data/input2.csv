@@ -1,0 +1,10 @@
+﻿
+define_stuff,bananas,nutritious
+add,15,bananas
+get_count,bananas,
+save_data,
+define_stuff,oranges,citrus
+add,20,oranges
+load_data,1,
+remove,5,bananas
+get_count,bananas,
