@@ -13,9 +13,9 @@ def locator(type):
             return 'http://server_b:5000'
     else:
         if type[0].lower() >= 'a' and type[0].lower() <= 'l':
-            return 'http://localhost:5001'
+            return f'http://localhost:{os.getenv("SERVER_A_PORT", "5001")}'
         else:
-            return 'http://localhost:5002'
+            return f'http://localhost:{os.getenv("SERVER_B_PORT", "5002")}'
 
 class InventoryClient:
     def __init__(self, base_url):

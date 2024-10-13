@@ -7,10 +7,14 @@ class TestEndToEnd(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.server_a_process = subprocess.Popen(['python', 'server.py', '--port', '5001'])
-        cls.server_b_process = subprocess.Popen(['python', 'server.py', '--port', '5002'])
+        cls.port_a = 5001
+        cls.port_b = 5002 
+
+        cls.server_a_process = subprocess.Popen(['python', 'server.py', str(cls.port_a)])
+        cls.server_b_process = subprocess.Popen(['python', 'server.py', str(cls.port_b)])
         time.sleep(5)
-        cls.client = InventoryClient("http://localhost:5000")
+        
+        cls.client = InventoryClient(f"http://localhost:{cls.port_a}")
 
     @classmethod
     def tearDownClass(cls):
@@ -78,3 +82,4 @@ class TestEndToEnd(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
