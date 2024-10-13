@@ -1,23 +1,21 @@
 import unittest
 import subprocess
 import time
+import requests
 from client import InventoryClient
 
 class TestEndToEnd(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.server_a_process = subprocess.Popen(['python', 'server.py', '--port', '5001'])
-        cls.server_b_process = subprocess.Popen(['python', 'server.py', '--port', '5002'])
-        time.sleep(5)
-        cls.client = InventoryClient("http://localhost:5001")
+        cls.docker_up_process = subprocess.Popen(['docker-compose', 'up', '-d'])
+        time.sleep(10) 
+        cls.client = InventoryClient("http://localhost:5001") 
 
     @classmethod
     def tearDownClass(cls):
-        cls.server_a_process.terminate()
-        cls.server_b_process.terminate()
-        cls.server_a_process.wait()
-        cls.server_b_process.wait()
+        subprocess.run(['docker-compose', 'down'], check=True)
+
     def test_define_and_manage_inventory(self):
         response = self.client.define_stuff("widget", "A useful widget")
         self.assertEqual(response, {'message': "Defined type 'widget' with description 'A useful widget'."})
@@ -53,7 +51,7 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(count_response, {'count': -1})
 
     # New Tests
-    #A4-e2e-1
+    # A4-e2e-1
     def test_define_stuff_routing(self):
         self.client.undefine("apple")
         response = self.client.define_stuff("apple", "A fruit")
@@ -62,7 +60,8 @@ class TestEndToEnd(unittest.TestCase):
         self.client.undefine("zebra")
         response = self.client.define_stuff("zebra", "An animal")
         self.assertEqual(response, {'message': "Defined type 'zebra' with description 'An animal'."})
-    #A4-e2e-2
+
+    # A4-e2e-2
     def test_add_routing(self):
         self.client.undefine("banana")
         self.client.undefine("mango")
@@ -74,7 +73,6 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(response, {'message': "Defined type 'mango' with description 'A tropical fruit'."})
         response = self.client.add(5, "mango")
         self.assertEqual(response, {'message': "Added 5 of type 'mango'."})
-    
 
 if __name__ == '__main__':
     unittest.main()
