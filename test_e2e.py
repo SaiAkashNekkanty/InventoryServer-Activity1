@@ -10,7 +10,7 @@ class TestEndToEnd(unittest.TestCase):
         cls.server_a_process = subprocess.Popen(['python', 'server.py', '--port', '5001'])
         cls.server_b_process = subprocess.Popen(['python', 'server.py', '--port', '5002'])
         time.sleep(5)
-        cls.client = InventoryClient("http://localhost:5000")
+        cls.client = InventoryClient("http://localhost:5001")
 
     @classmethod
     def tearDownClass(cls):
