@@ -4,7 +4,9 @@ from service import InventoryService
 
 app = Flask(__name__)
 service = InventoryService()
-
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "healthy"}), 200
 @app.route('/define_stuff', methods=['POST'])
 def define_stuff():
     data = request.json

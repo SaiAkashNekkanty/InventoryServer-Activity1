@@ -1,19 +1,45 @@
 version: '3.8'
 
 services:
-  server:
+  server_a:
     build:
       context: .
       dockerfile: Dockerfile_server
     ports:
-      - "5000:5000"
+      - "5001:5000"  
 
-  client:
+  server_b:
+    build:
+      context: .
+      dockerfile: Dockerfile_server
+    ports:
+      - "5002:5000" 
+
+  client_a:
     build:
       context: .
       dockerfile: Dockerfile_client
     depends_on:
-      - server
-    command: python client_file.py /app/data 20  # Adjust command to run your script
+      - server_a
+      - server_b
+    command: python client_file.py /app/data 20 
+    environment:
+      - SERVER_URL=http://server_a:5000  
+      - ENVIRONMENT=docker               
     volumes:
       - ./data:/app/data
+
+  client_b:
+    build:
+      context: .
+      dockerfile: Dockerfile_client
+    depends_on:
+      - server_a
+      - server_b
+    command: python client_file.py /app/data 20 
+    environment:
+      - SERVER_URL=http://server_b:5000  
+      - ENVIRONMENT=docker               
+    volumes:
+      - ./data:/app/data
+

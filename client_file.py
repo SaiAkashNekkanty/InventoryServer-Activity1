@@ -2,11 +2,12 @@ import os
 import time
 import csv
 import sys
-from client import InventoryClient
+from client import InventoryClient, locator 
 
 def main(input_path, sleep_time_ms):
     server_url = os.getenv("SERVER_URL", "http://server:5000")
     client = InventoryClient(server_url)
+    print(f"Starting client with base server URL: {server_url}")
     if os.path.isfile(input_path) and input_path.endswith('.csv'):
         process_file(client, input_path, sleep_time_ms)
     elif os.path.isdir(input_path):
@@ -19,22 +20,38 @@ def main(input_path, sleep_time_ms):
 
 def process_file(client, input_file_path, sleep_time_ms):
     print(f"Processing file: {input_file_path}")
-
-    with open(input_file_path, 'r') as file:
+    with open(input_file_path, 'r', encoding='utf-8-sig') as file:
         reader = csv.reader(file)
         for row in reader:
-            api_name = row[0]
-            parameters = row[1:]
+            if not row or len(row) == 0:
+                continue  
+            print(f"Processing row: {row}")
+
+            api_name = row[0].strip()
+            parameters = [param.strip() for param in row[1:]]
+
+            print(f"API name: {api_name}, Parameters: {parameters}")
 
             try:
                 if api_name == "define_stuff":
-                    output = client.define_stuff(parameters[0], parameters[1])
+                    type_param = parameters[0] 
+                elif api_name in ["add", "remove", "get_count"]:
+                    type_param = parameters[1] 
+                else:
+                    type_param = None 
+
+                if type_param:
+                    print(f"Routing based on type '{type_param}' using locator function.")
+                    server = locator(type_param)
+                    print(f"Routed to server: {server}")
+                if api_name == "define_stuff":
+                    output = client.define_stuff(parameters[0], parameters[1])  
                 elif api_name == "undefine":
                     output = client.undefine(parameters[0])
                 elif api_name == "add":
-                    output = client.add(int(parameters[0]), parameters[1])
+                    output = client.add(int(parameters[0]), parameters[1])  
                 elif api_name == "remove":
-                    output = client.remove(int(parameters[0]), parameters[1])
+                    output = client.remove(int(parameters[0]), parameters[1])  
                 elif api_name == "get_count":
                     output = client.get_count(parameters[0])
                 elif api_name == "save_data":
@@ -46,13 +63,10 @@ def process_file(client, input_file_path, sleep_time_ms):
                 else:
                     print(f"Unknown API name: {api_name}")
                     continue
-
-                print(f"R1-LOG:{api_name},OUTPUT:{output}")
+                print(f"R1-LOG:{api_name}, OUTPUT:{output}")
 
             except Exception as e:
                 print(f"Error processing {api_name} with parameters {parameters}: {e}")
-
-    
             time.sleep(sleep_time_ms / 1000.0)
 
 if __name__ == "__main__":

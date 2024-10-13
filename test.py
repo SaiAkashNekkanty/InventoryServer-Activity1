@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from client import InventoryClient
+from client import InventoryClient, locator
 import requests
 
 class TestInventoryClient(unittest.TestCase):
@@ -96,6 +96,16 @@ class TestInventoryClient(unittest.TestCase):
         response = client.delete_data("1")
         
         self.assertEqual(response, {'message': 'Snapshot deleted successfully.'})
+
+    #A4-UT-1
+    def test_locator_server_a(self):
+        server = locator("apples")
+        self.assertEqual(server, 'http://localhost:5001')
+    
+    #A4-UT-2
+    def test_locator_server_b(self):
+        server = locator("mangoes")
+        self.assertEqual(server, 'http://localhost:5002')
 
 if __name__ == '__main__':
     unittest.main()
