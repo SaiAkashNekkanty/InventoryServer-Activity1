@@ -43,7 +43,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        python -m unittest discover
+        python -m unittest tests.py
 
     - name: Build Docker images
       run: |
