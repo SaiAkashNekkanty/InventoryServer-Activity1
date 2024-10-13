@@ -5,7 +5,7 @@ import sys
 from client import InventoryClient, locator 
 
 def main(input_path, sleep_time_ms):
-    server_url = os.getenv("SERVER_URL", "http://localhost:5000")
+    server_url = os.getenv("SERVER_URL", "http://server:5000")
     client = InventoryClient(server_url)
     print(f"Starting client with base server URL: {server_url}")
     if os.path.isfile(input_path) and input_path.endswith('.csv'):
